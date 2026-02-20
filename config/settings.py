@@ -1,6 +1,6 @@
 # Perforce Settings
 class P4:
-    TIMEOUT = 15
+    TIMEOUT = 15 # 15 seconds
 
 # Excel Settings
 class EXCEL:
@@ -22,7 +22,7 @@ class EVALUATOR:
 
 # GUI Settings
 class GUI:
-    APPEARANCE_MODE = "Dark"
+    APPEARANCE_MODE = "system"
     COLOR_THEME = "blue"
     WINDOW_TITLE = "CLCheck Smart Auto Judgement"
     WINDOW_GEOMETRY = "1280x720"
