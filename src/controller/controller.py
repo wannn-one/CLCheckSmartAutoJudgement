@@ -13,7 +13,10 @@ class LogicTracerController:
 
     def _setup_logging(self):
         logger.remove()
-        logger.add(sys.stderr, format="<level>{message}</level>")
+        
+        if sys.stderr is not None: # if on development, dont log the terminal log
+            logger.add(sys.stderr, format="<level>{message}</level>")
+
         def gui_sink(msg):
             lvl = msg.record["level"].name
             tag = "error" if lvl in ["ERROR", "CRITICAL"] else "warning" if lvl == "WARNING" else "success" if lvl == "SUCCESS" else "info"

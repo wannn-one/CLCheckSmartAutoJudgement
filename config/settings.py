@@ -1,3 +1,5 @@
+import sys, os
+
 # Perforce Settings
 class P4:
     TIMEOUT = 15 # 15 seconds
@@ -36,3 +38,15 @@ class LOG:
     SUCCESS = "#4CAF50"
     WARNING = "#FFC107"
     ERROR = "#FF5555"
+
+# Resource settings
+# Got solution from https://stackoverflow.com/a/13790741
+def resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)

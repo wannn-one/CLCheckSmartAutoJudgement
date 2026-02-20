@@ -3,7 +3,7 @@ from tkinter import messagebox
 
 import customtkinter as ctk
 from customtkinter import filedialog
-from config.settings import GUI, LOG, FONT
+from config.settings import GUI, LOG, FONT, resource_path
 from PIL import Image
 
 ctk.set_appearance_mode(GUI.APPEARANCE_MODE)
@@ -14,6 +14,7 @@ class LogicTracerView(ctk.CTk):
         super().__init__()
         self.title(GUI.WINDOW_TITLE)
         self.geometry(GUI.WINDOW_GEOMETRY)
+        self.iconbitmap(resource_path("resources/app_icon.ico"))
         self.controller = None
         self._setup_ui()
 
@@ -47,13 +48,14 @@ class LogicTracerView(ctk.CTk):
                               padx=10, 
                               pady=(0, 10), 
                               sticky="ew")
-        
+
         ctk.CTkButton(self,
                       width=25,
                       text="",
                       fg_color="transparent",
                       
-                      image=ctk.CTkImage(Image.open("resources/folder.png"), 
+                      
+                      image=ctk.CTkImage((Image.open(resource_path("resources/folder.png"))), 
                                          size=(25,25)),
                       command=lambda: self._browse(self.entry_excel)).grid(row=1, 
                                                                            column=2, 

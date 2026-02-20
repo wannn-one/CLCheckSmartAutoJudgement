@@ -1,0 +1,1 @@
+pyinstaller --noconfirm --windowed --onedir --name "CLCheckAutoJudgement" --add-data "resources:resources" --icon "resources/app_icon.ico" --collect-all customtkinter main.py
