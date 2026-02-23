@@ -1,15 +1,13 @@
 <p align="center">
+  <img src="documentation/app_icon.png" height="150px"/>
+</p>
 
-<img src="documentation/app_icon.png" height="150px"/>
+<h1 align="center">CLCheck Smart Auto Judgement</h1>
 
-<br>
-
-# CLCheck Smart Auto Judgement
-
-![Python Version](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)
-![License](https://img.shields.io/badge/License-Proprietary-red?style=flat)
-![Status](https://img.shields.io/badge/Status-Development-orange?style=flat)
-
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white">
+  <img src="https://img.shields.io/badge/License-Proprietary-red?style=flat">
+  <img src="https://img.shields.io/badge/Status-Development-orange?style=flat">
 </p>
 
 ## Table of Contents
