@@ -1,6 +1,6 @@
-<div style="text-align: center">
+<p align="center">
 
-<img src="documentation/app_icon.png" width=150 height=150/>
+<img src="documentation/app_icon.png" height="150px"/>
 
 <br>
 
@@ -10,7 +10,7 @@
 ![License](https://img.shields.io/badge/License-Proprietary-red?style=flat)
 ![Status](https://img.shields.io/badge/Status-Development-orange?style=flat)
 
-</div>
+</p>
 
 ## Table of Contents
 
