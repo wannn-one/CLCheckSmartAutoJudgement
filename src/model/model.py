@@ -23,11 +23,13 @@ class LogicTracerModel:
             # Validasi Dasar
             if not depot_path.endswith('.h'):
                 df.at[index, 'Necessity of Evaluation'] = 'N'
+                df.at[index, 'Implementation or Not'] = 'N'
                 df.at[index, 'Reason'] = 'Bukan file header (.h)'
                 continue
                 
             if target_cl.lower() in ['nan', 'none', '']:
                 df.at[index, 'Necessity of Evaluation'] = 'N'
+                df.at[index, 'Implementation or Not'] = 'N'
                 df.at[index, 'Reason'] = 'Target CL kosong'
                 continue
 
@@ -54,6 +56,9 @@ class LogicTracerModel:
             
             df.at[index, 'Necessity of Evaluation'] = necessity
             df.at[index, 'Reason'] = reason
+
+            if necessity == "N":
+                df.at[index, 'Implementation or Not'] = 'N'
             
             if necessity == "Y":
                 logger.warning(f"FLAG: {reason}")

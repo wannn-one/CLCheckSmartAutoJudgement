@@ -34,7 +34,7 @@ Please download the document for a better reading experience.
 
     - **Non-functional Check (Comments, Whitespace, Tabs)**: Able to identify non-functional changes (such as comments) that have zero impact on the code logic.
 
-    - **Report Generation**: Able to generate reports containing "Necessity of Evaluation," "Implementation or Not," and "Reason.
+    - **Report Generation**: Able to generate reports containing "Necessity of Evaluation," "Implementation or Not," and "Reason directly to the excel
 
 - **Modern GUI**: User-friendly interface based on `CustomTkinter`
 

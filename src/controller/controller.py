@@ -21,6 +21,7 @@ class LogicTracerController:
             lvl = msg.record["level"].name
             tag = "error" if lvl in ["ERROR", "CRITICAL"] else "warning" if lvl == "WARNING" else "success" if lvl == "SUCCESS" else "info"
             self.view.append_log(msg.record["message"], tag)
+
         logger.add(gui_sink, format="{message}")
 
     def run_scan(self):
@@ -47,13 +48,17 @@ class LogicTracerController:
         )
         
         if result_df is not None:
-            output_path = inputs['excel'].replace(".xlsm", ".xlsx").replace(".xlsx", "_P4_CHECKED.xlsx")
-            try:
-                ExcelProcessor.save(result_df, output_path)
+            output_path = inputs['excel'] 
+            
+            status_save = ExcelProcessor.save(output_path, result_df, inputs['col_name'])
+            
+            # Cek apakah benar-benar "OK"
+            if status_save == "OK":
                 self.view.append_log("-" * 50, "info")
-                self.view.append_log(f"REPORT GENERATED:", "success")
+                self.view.append_log(f"SUCCESS: REPORT SAVED TO ORIGINAL FILE!", "success")
                 self.view.append_log(f"{output_path}", "success")
-            except Exception as e:
-                self.view.append_log(f"Save Error: {e}", "error")
+            else:
+                # JIKA GAGAL, MUNCULKAN TULISAN MERAHNYA DI SINI
+                self.view.append_log(f"SAVE FAILED: {status_save}", "error")
         else:
             self.view.append_log(f"Scan Error: {status}", "error")
