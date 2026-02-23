@@ -1,4 +1,16 @@
+<div style="text-align: center">
+
+<img src="documentation/app_icon.png" width=150 height=150/>
+
+<br>
+
 # CLCheck Smart Auto Judgement
+
+![Python Version](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-Proprietary-red?style=flat)
+![Status](https://img.shields.io/badge/Status-Development-orange?style=flat)
+
+</div>
 
 ## Table of Contents
 
