@@ -1,4 +1,3 @@
-# mvc/model.py
 from loguru import logger
 from core.p4_connector import P4Connector
 from core.logic_evaluator import LogicEvaluator
@@ -6,14 +5,14 @@ from core.excel_processor import ExcelProcessor
 
 class LogicTracerModel:
     def scan_excel_and_process(self, excel_path, path_col_name):
-        logger.info(f" Membaca Excel Tracker: {excel_path}")
+        logger.info(f"  Reading excel: {excel_path}")
         
         # 1. Load Data
         df, status = ExcelProcessor.load_and_prepare(excel_path, path_col_name)
         if df is None:
             return None, status
 
-        logger.info(f" Mulai mengecek ke Perforce... (Membaca {len(df)} baris data)")
+        logger.info(f"  Starting checking in Perforce... (Reading {len(df)} rows of data)")
 
         # 2. Proses tiap baris
         for index, row in df.iterrows():
@@ -40,16 +39,16 @@ class LogicTracerModel:
             if not rev_now:
                 df.at[index, 'Necessity of Evaluation'] = 'Y'
                 df.at[index, 'Reason'] = 'Error: Gagal mendapatkan Nomor Revisi (#) dari Perforce'
-                logger.error(f" Gagal mendapat revisi untuk CL {target_cl}")
+                logger.error(f"Failed to get revision for CL {target_cl}")
                 continue
                 
-            logger.info(f" > Terdeteksi sebagai Revision #{rev_now}")
+            logger.info(f"  > Detected as Revision #{rev_now}")
             content_now = P4Connector.get_file_content(depot_path, f"#{rev_now}")
             
             content_prev = None
             if rev_now > 1:
                 content_prev = P4Connector.get_file_content(depot_path, f"#{rev_now - 1}")
-                logger.info(f" > Berhasil mendapatkan Revision sebelumnya #{rev_now - 1}")
+                logger.info(f"  > Successfully got previous Revision #{rev_now - 1}")
 
             # Evaluasi
             necessity, reason = LogicEvaluator.evaluate(content_now, content_prev)
