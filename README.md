@@ -95,6 +95,12 @@ CLCheckSmartAutoJudgement/
 - Error: Session Expired
     - Open P4V, login with your APO
 
+## TODO
+
+- BTO & Preprocessor Check Mechanism
+- Abort Controller
+- Validation of "Copy Up"
+
 ## Author
 **Ikhwanul Abiyu D. - iei25110002**
 <br>
