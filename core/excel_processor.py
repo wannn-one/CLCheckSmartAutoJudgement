@@ -6,32 +6,23 @@ from config.settings import EXCEL
 class ExcelProcessor:
     @staticmethod
     def load_and_prepare(excel_path, path_col_name):
-        """Membaca file Excel, mencari baris header yang tepat, dan menyiapkan kolom output."""
+        """Reads the Excel file, uses the specific header row, and prepares the output columns."""
         try:
             with pd.ExcelFile(excel_path) as xl_file:
                 if EXCEL.DEFAULT_SHEET_NAME not in xl_file.sheet_names:
-                    return None, f"Sheet '{EXCEL.DEFAULT_SHEET_NAME}' tidak ditemukan!"
+                    return None, f"Sheet '{EXCEL.DEFAULT_SHEET_NAME}' not found!"
 
-            df_temp = pd.read_excel(excel_path, sheet_name=EXCEL.DEFAULT_SHEET_NAME, header=None, nrows=EXCEL.MAX_HEADER_ROWS_TO_CHECK)
-            header_row_index = -1
-            
-            for idx, row in df_temp.iterrows():
-                row_values = [str(x).strip() for x in row.values]
-                if path_col_name in row_values:
-                    header_row_index = idx
-                    break
-            
-            if header_row_index == -1:
-                return None, f"Kolom '{path_col_name}' tidak ditemukan di {EXCEL.MAX_HEADER_ROWS_TO_CHECK} baris pertama!"
-            
+            # 23rd Row in Excel = Index 22nd in Pandas
+            header_row_index = EXCEL.FILE_PATH_HEADER_ROW - 1 
+
             df = pd.read_excel(excel_path, sheet_name=EXCEL.DEFAULT_SHEET_NAME, header=header_row_index)
             df.columns = [str(c).strip() for c in df.columns]
             
             if path_col_name not in df.columns:
-                 return None, f"Kolom '{path_col_name}' gagal dibaca."
-            
+                return None, f"Column '{path_col_name}' failed to read at row {EXCEL.FILE_PATH_HEADER_ROW}."
+
             if 'Target CL' not in df.columns:
-                return None, "Kolom 'Target CL' tidak ditemukan di Excel."
+                return None, "The column 'Target CL' was not found in Excel."
 
             if 'Necessity of Evaluation' not in df.columns:
                 df['Necessity of Evaluation'] = ""
@@ -46,48 +37,41 @@ class ExcelProcessor:
 
     @staticmethod
     def save(excel_path, df, path_col_name):
-        """Menyimpan hasil dengan menimpa Microsoft Excel asli"""
+        """Saves results by overwriting the original Microsoft Excel"""
         excel = None
         wb = None
         try:
-            # win32com butuh abs_path
+            # win32com need abs_path
             abs_path = os.path.abspath(excel_path)
             
-            # Buka aplikasi Excel di background (tidak terlihat)
+            # open Excel on background
             excel = win32com.client.Dispatch("Excel.Application")
             excel.Visible = False
-            excel.DisplayAlerts = False # Matikan popup peringatan Excel
+            excel.DisplayAlerts = False # Turn off Excel warning popups
 
-            # Buka workbook
+            # open workbook
             wb = excel.Workbooks.Open(abs_path)
             ws = wb.Sheets(EXCEL.DEFAULT_SHEET_NAME)
 
-            # 1. Cari lokasi baris Header
-            header_row_idx = None
+            # 1. search header
+            header_row_idx = EXCEL.FILE_PATH_HEADER_ROW
             max_col = ws.UsedRange.Columns.Count
             
-            for r in range(1, EXCEL.MAX_HEADER_ROWS_TO_CHECK + 1):
-                for c in range(1, max_col + 1):
-                    val = str(ws.Cells(r, c).Value).strip()
-                    if val == path_col_name:
-                        header_row_idx = r
-                        break
-                if header_row_idx:
-                    break
+            val = str(ws.Cells(EXCEL.FILE_PATH_HEADER_ROW, EXCEL.FILE_PATH_HEADER_COL).Value).strip()
 
-            if not header_row_idx:
+            if val != path_col_name:
                 wb.Close(SaveChanges=False)
                 excel.Quit()
-                return "Error: Header kolom tidak ditemukan."
+                return f"Error: Expected '{path_col_name}' at row {header_row_idx}, but found '{val}' instead."
 
-            # 2. Petakan letak (index) setiap kolom
+            # 2. Map the location (index) of each column
             headers = {}
-            for c in range(1, max_col + 5): # Tambah jarak buffer
+            for c in range(1, max_col + 5): # buffer
                 val = str(ws.Cells(header_row_idx, c).Value).strip()
                 if val and val != "None":
                     headers[val] = c
 
-            # 3. Tulis hasil dari DataFrame
+            # 3. write to dataframe
             for i, row_data in enumerate(df.to_dict('records')):
                 excel_row = header_row_idx + 1 + i
                 
@@ -106,7 +90,7 @@ class ExcelProcessor:
             return "OK"
 
         except Exception as e:
-            # Jika ada error, pastikan Excel di-close agar tidak nyangkut di Task Manager
+            # If there is an error, make sure Excel is closed so it doesn't get stuck in Task Manager.
             if wb:
                 try: wb.Close(SaveChanges=False)
                 except: pass

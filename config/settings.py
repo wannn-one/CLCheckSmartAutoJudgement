@@ -7,7 +7,10 @@ class P4:
 # Excel Settings
 class EXCEL:
     DEFAULT_SHEET_NAME = "CLCheck"
-    MAX_HEADER_ROWS_TO_CHECK = 25
+
+    # File Path Perforce
+    FILE_PATH_HEADER_ROW = 23
+    FILE_PATH_HEADER_COL = "C"
 
 # Logic Evaluator Settings
 class EVALUATOR:

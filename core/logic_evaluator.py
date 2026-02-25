@@ -40,7 +40,7 @@ class LogicEvaluator:
         if not list_prev and not list_now:
             return 'N', 'Aman (Tidak ada definisi logika yang terdeteksi)'
         if list_prev == list_now:
-            return 'N', 'Aman (Susunan logika tidak berubah)'
+            return 'N', 'Aman (Logika tidak berubah)'
             
         old_len = len(list_prev)
         if list_now[:old_len] == list_prev:
