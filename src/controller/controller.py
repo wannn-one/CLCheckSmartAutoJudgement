@@ -1,7 +1,7 @@
-# mvc/controller.py
 from loguru import logger
 import sys
 import os
+import glob
 import threading
 from core.excel_processor import ExcelProcessor
 
@@ -19,7 +19,16 @@ class LogicTracerController:
 
         def gui_sink(msg):
             lvl = msg.record["level"].name
-            tag = "error" if lvl in ["ERROR", "CRITICAL"] else "warning" if lvl == "WARNING" else "success" if lvl == "SUCCESS" else "info"
+
+            if lvl in ["ERROR", "CRITICAL"]:
+                tag = "error"
+            elif lvl == "WARNING":
+                tag = "warning"
+            elif lvl == "SUCCESS":
+                tag = "success"
+            else:
+                tag = "info"
+
             self.view.append_log(msg.record["message"], tag)
 
         logger.add(gui_sink, format="{message}")
@@ -28,7 +37,7 @@ class LogicTracerController:
         inputs = self.view.get_inputs()
         
         if not inputs['excel']:
-            self.view.alert("Error", "Please select CLCheck Excel file!", True)
+            self.view.alert("Error", "Please select a Folder or File path!", True)
             return
 
         self.view.clear_logs()
@@ -42,23 +51,46 @@ class LogicTracerController:
         t.start()
 
     def _process_background(self, inputs):
-        result_df, status = self.model.scan_excel_and_process(
-            inputs['excel'], 
-            inputs['col_name']
-        )
+        input_path = inputs['excel']
+        col_name = inputs['col_name']
         
-        if result_df is not None:
-            output_path = inputs['excel'] 
-            
-            status_save = ExcelProcessor.save(output_path, result_df, inputs['col_name'])
-            
-            # Cek apakah benar-benar "OK"
-            if status_save == "OK":
-                self.view.append_log("-" * 50, "info")
-                self.view.append_log(f"SUCCESS: REPORT SAVED TO ORIGINAL FILE!", "success")
-                self.view.append_log(f"{output_path}", "success")
-            else:
-                # JIKA GAGAL, MUNCULKAN TULISAN MERAHNYA DI SINI
-                self.view.append_log(f"SAVE FAILED: {status_save}", "error")
+        # 1. Check the path if its a single file or a folder
+        if os.path.isfile(input_path) and input_path.endswith(('.xlsm', '.xlsx')):
+            files_to_process = [input_path]
+        elif os.path.isdir(input_path): # Search all .xlsm file on that folder
+            files_to_process = glob.glob(os.path.join(input_path, "*.xlsm"))
         else:
-            self.view.append_log(f"Scan Error: {status}", "error")
+            self.view.append_log(" Error: Invalid path! Please enter the folder that contain CLCheck files.", "error")
+            return
+
+        # 2. Validate number of files
+        if not files_to_process:
+            self.view.append_log(" Warning: No .xlsm files were found in that folder", "warning")
+            return
+
+        self.view.append_log(f" Found {len(files_to_process)} excel file(s) to process...", "info")
+        
+        # 3. Looping process
+        success_count = 0
+        for i, file_path in enumerate(files_to_process, 1):
+            filename = os.path.basename(file_path)
+            self.view.append_log("-" * 60, "info")
+            self.view.append_log(f"[{i}/{len(files_to_process)}] Processing: {filename}", "info")
+            
+            # Scan and process
+            result_df, status = self.model.scan_excel_and_process(file_path, col_name)
+            
+            if result_df is not None:
+                status_save = ExcelProcessor.save(file_path, result_df, col_name)
+                
+                if status_save == "OK":
+                    self.view.append_log(f" SUCCESS: Report saved to {filename}", "success")
+                    success_count += 1
+                else:
+                    self.view.append_log(f" SAVE FAILED [{filename}]: {status_save}", "error")
+            else:
+                self.view.append_log(f" SCAN ERROR [{filename}]: {status}", "error")
+
+        # 4. Show Final Summary
+        self.view.append_log("-" * 60, "info")
+        self.view.append_log(f" PROCESS DONE: {success_count} from {len(files_to_process)} file(s) updated successfully!", "success")
