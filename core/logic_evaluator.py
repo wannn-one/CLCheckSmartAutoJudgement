@@ -3,15 +3,40 @@ from config.settings import EVALUATOR
 
 class LogicEvaluator:
     @staticmethod
+    def _strip_nonfunctional(content: str) -> str:
+        """
+        Menghapus elemen non-fungsional dari kode C/C++ sebelum dianalisis:
+        1. Block comments  /* ... */
+        2. Line comments   // ...
+        3. Normalisasi whitespace (spasi, tab, newline) menjadi satu spasi
+        """
+        # Hapus block comment /* ... */ (termasuk yang multi-baris)
+        content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+
+        # Hapus line comment // ...
+        content = re.sub(r'//[^\n]*', '', content)
+
+        # Normalisasi whitespace: semua kombinasi spasi/tab/newline -> 1 spasi
+        content = re.sub(r'\s+', ' ', content).strip()
+
+        return content
+
+    @staticmethod
     def evaluate(content_now, content_prev):
         if content_now is None: 
             return "Y", "Gagal membaca file di Target CL"
         if content_prev is None: 
             return "Y", "Gagal membaca file versi sebelumnya (File Baru?)"
 
+        clean_now = LogicEvaluator._strip_nonfunctional(content_now)
+        clean_prev = LogicEvaluator._strip_nonfunctional(content_prev)
+
+        if clean_now == clean_prev:
+            return 'N', 'Aman: Perubahan non-fungsional saja (komentar / whitespace / tab)'
+
         regex_pattern = r'\b[A-Z_][A-Z0-9_]{2,}\b'
-        tokens_now = re.findall(regex_pattern, content_now)
-        tokens_prev = re.findall(regex_pattern, content_prev)
+        tokens_now = re.findall(regex_pattern, clean_now)
+        tokens_prev = re.findall(regex_pattern, clean_prev)
 
         def is_relevant(token):
             if token in EVALUATOR.IGNORED_KEYWORDS: 

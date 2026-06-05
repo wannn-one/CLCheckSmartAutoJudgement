@@ -38,18 +38,28 @@ class LogicTracerController:
         t.start()
 
     def _process_background(self, inputs):
-        result_df, status = self.model.scan_excel_and_process(
-            inputs['excel'], 
+        results, status = self.model.scan_excel_and_process(
+            inputs['excel'],
             inputs['col_name']
         )
-        
-        if result_df is not None:
-            output_path = inputs['excel'].replace(".xlsm", ".xlsx").replace(".xlsx", "_P4_CHECKED.xlsx")
+    
+        if results is not None:
             try:
-                ExcelProcessor.save(result_df, output_path)
+                ExcelProcessor.write_results_to_xlsm(
+                    excel_path    = inputs['excel'],
+                    results       = results,
+                    path_col_name = inputs['col_name']
+                )
                 self.view.append_log("-" * 50, "info")
-                self.view.append_log(f"REPORT GENERATED:", "success")
-                self.view.append_log(f"{output_path}", "success")
+                self.view.append_log(f"REPORT DITULIS KE FILE ASLI:", "success")
+                self.view.append_log(f"{inputs['excel']}", "success")
+    
+                # Statistik ringkas
+                total   = len(results)
+                flagged = sum(1 for r in results if r['necessity'] == 'Y')
+                safe    = total - flagged
+                self.view.append_log(f"Total: {total} | Safe (N): {safe} | Flagged (Y): {flagged}", "info")
+    
             except Exception as e:
                 self.view.append_log(f"Save Error: {e}", "error")
         else:
